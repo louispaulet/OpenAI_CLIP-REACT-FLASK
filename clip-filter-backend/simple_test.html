@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Text Similarity</title>
+  <script>
+    async function submitForm() {
+      const imageInput = document.getElementById('image-input');
+      const textInput1 = document.getElementById('text-input1');
+      const textInput2 = document.getElementById('text-input2');
+      const result = document.getElementById('result');
+
+      const imageFile = imageInput.files[0];
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const imageBase64 = reader.result.split(',')[1];
+        const response = await fetch('http://localhost:5000/image_text_similarity_best_match', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image_base64: imageBase64,
+            text_input1: textInput1.value,
+            text_input2: textInput2.value,
+          }),
+        });
+
+        const data = await response.json();
+        result.textContent = 'Best matching text: ' + data.best_match;
+      };
+      reader.readAsDataURL(imageFile);
+    }
+  </script>
+</head>
+<body>
+  <h1>Image Text Similarity</h1>
+  <form onsubmit="event.preventDefault(); submitForm();">
+    <label for="image-input">Image:</label>
+    <input type="file" id="image-input" accept="image/*" required>
+    <br>
+    <label for="text-input1">Text Input 1:</label>
+    <input type="text" id="text-input1" required>
+    <br>
+    <label for="text-input2">Text Input 2:</label>
+    <input type="text" id="text-input2" required>
+    <br>
+    <button type="submit">Find Best Match</button>
+  </form>
+  <p id="result"></p>
+</body>
+</html>
