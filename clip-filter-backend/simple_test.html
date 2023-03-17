@@ -32,13 +32,26 @@
       };
       reader.readAsDataURL(imageFile);
     }
+
+    function updateImagePreview() {
+      const imageInput = document.getElementById('image-input');
+      const imagePreview = document.getElementById('image-preview');
+      const imageFile = imageInput.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        imagePreview.src = reader.result;
+      };
+      reader.readAsDataURL(imageFile);
+    }
   </script>
 </head>
 <body>
   <h1>Image Text Similarity</h1>
   <form onsubmit="event.preventDefault(); submitForm();">
     <label for="image-input">Image:</label>
-    <input type="file" id="image-input" accept="image/*" required>
+    <input type="file" id="image-input" accept="image/*" onchange="updateImagePreview();" required>
+    <br>
+    <img id="image-preview" alt="Selected Image Preview" style="max-width: 100%; max-height: 300px;">
     <br>
     <label for="text-input1">Text Input 1:</label>
     <input type="text" id="text-input1" required>
