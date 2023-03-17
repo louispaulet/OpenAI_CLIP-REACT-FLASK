@@ -8,31 +8,35 @@ function App() {
   const [results, setResults] = useState([]);
 
   async function submitForm() {
-    for (const imageFile of images) {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const imageBase64 = reader.result.split(',')[1];
-        const response = await fetch('http://localhost:5000/image_text_similarity_best_match', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            image_base64: imageBase64,
-            text_input1: textInput1,
-            text_input2: textInput2,
-          }),
-        });
+	  for (const imageFile of images) {
+		const reader = new FileReader();
+		reader.onloadend = async () => {
+		  const imageBase64 = reader.result.split(',')[1];
+		  const response = await fetch('http://localhost:5000/image_text_similarity_best_match', {
+			method: 'POST',
+			headers: {
+			  'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({
+			  image_base64: imageBase64,
+			  text_input1: textInput1,
+			  text_input2: textInput2,
+			}),
+		  });
 
-        const data = await response.json();
-        setResults((prevResults) => [
-          ...prevResults,
-          'Best matching text for ' + imageFile.name + ': ' + data.best_match,
-        ]);
-      };
-      reader.readAsDataURL(imageFile);
-    }
-  }
+		  const data = await response.json();
+		  setResults((prevResults) => [
+			...prevResults,
+			{
+			  thumbnail: URL.createObjectURL(imageFile),
+			  text: 'Best matching text for ' + imageFile.name + ': ' + data.best_match,
+			},
+		  ]);
+		};
+		reader.readAsDataURL(imageFile);
+	  }
+	}
+
 
   function handleFileSelect(event) {
     event.preventDefault();
@@ -112,10 +116,17 @@ function App() {
       <button type="submit">Find Best Match</button>
     </form>
     <ul id="result">
-      {results.map((result, index) => (
-        <li key={index}>{result}</li>
-      ))}
-    </ul>
+	  {results.map((result, index) => (
+		<li key={index}>
+		  <img
+			src={result.thumbnail}
+			alt="Thumbnail"
+			style={{ maxWidth: '50px', maxHeight: '50px', marginRight: '10px' }}
+		  />
+		  {result.text}
+		</li>
+	  ))}
+	</ul>
   </div>
 );
 
