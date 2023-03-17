@@ -1,6 +1,68 @@
-# OpenAI_CLIP-REACT-FLASK
-Showcase OpenAI Clip in various applications
+# OpenAI CLIP Image Text Similarity
 
-## This is a temp readme
+This repository contains a Flask and React-based web application for finding the best matching text description for a set of images using OpenAI's CLIP model. The application provides a user-friendly interface for uploading images, inputting text descriptions, and displaying the best matching text for each image.
 
-Stable state backup.  
+## Features
+
+- Drag and drop or select images to analyze
+- Enter two text descriptions to compare
+- Best matching text for each image is calculated using the CLIP model
+- Cosine similarity is used to measure the similarity between image and text embeddings
+- Results are displayed in a list, with image thumbnails and corresponding best matching text
+
+## Repository Structure
+
+The repository is organized into two main folders: `clip-filter-backend` and `clip-filter-frontend`.
+
+### `clip-filter-backend`
+
+This folder contains the Flask backend for the application. The backend consists of a single API endpoint, `/image_text_similarity_best_match`, which accepts an image and two text descriptions as input and returns the best matching text description for the image.
+
+- `Dockerfile`: Configuration for building the backend Docker container
+- `app.py`: Main Flask application file, containing the API endpoint and the CLIP model integration
+
+### `clip-filter-frontend`
+
+This folder contains the React frontend for the application. The frontend provides a user interface for uploading images, inputting text descriptions, and displaying the results.
+
+- `Dockerfile`: Configuration for building the frontend Docker container
+- `src/App.css`: CSS file containing the styles for the frontend
+- `src/App.js`: Main React component, containing the application logic and user interface
+
+### Other Files
+
+- `docker-compose.yml`: Configuration for running the frontend and backend services using Docker Compose
+
+## Getting Started
+
+### Prerequisites
+
+- Docker
+- Docker Compose
+
+### Running the Application
+
+1. Clone the repository:
+```bash
+git clone https://github.com/louispaulet/OpenAI_CLIP-REACT-FLASK.git
+```
+
+2. Change to the repository directory:
+```bash
+cd OpenAI_CLIP-REACT-FLASK
+```
+
+3. Build and run the application using Docker Compose:
+```bash
+docker-compose up --build
+```
+
+4. Access the application in your web browser at http://localhost.
+
+## Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
