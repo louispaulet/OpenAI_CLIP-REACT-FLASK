@@ -1,106 +1,124 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import './App.css';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [inputText, setInputText] = useState('');
-  const [filteredImages, setFilteredImages] = useState([]);
-  const [notFilteredImages, setNotFilteredImages] = useState([]);
+  const [textInput1, setTextInput1] = useState('');
+  const [textInput2, setTextInput2] = useState('');
+  const [results, setResults] = useState([]);
 
-  const onImageDrop = (e) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    Promise.all(files.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          resolve({ file, src: event.target.result });
-        };
-        reader.onerror = (error) => reject(error);
-        reader.readAsDataURL(file);
-      });
-    }))
-    .then(images => {
-      setImages(images);
-    });
-  };
+  async function submitForm() {
+    for (const imageFile of images) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const imageBase64 = reader.result.split(',')[1];
+        const response = await fetch('http://localhost:5000/image_text_similarity_best_match', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            image_base64: imageBase64,
+            text_input1: textInput1,
+            text_input2: textInput2,
+          }),
+        });
 
-  const onDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const onInputChange = (e) => {
-    setInputText(e.target.value);
-  };
-
-const onFilterClick = async () => {
-    try {
-      const base64Images = images.map((image) => {
-        return image.src.split(',')[1];
-      });
-      const response = await axios.post('http://localhost:5000/clip_filter', {
-        image_data: base64Images,
-        text: inputText,
-      });
-      
-      const similarities = response.data.similarities;
-      const similarityThreshold = 0.5; // Adjust this value to change the filtering criteria
-
-      const filtered = [];
-      const notFiltered = [];
-
-      images.forEach((image, index) => {
-        if (similarities[index] >= similarityThreshold) {
-          filtered.push(image);
-        } else {
-          notFiltered.push(image);
-        }
-      });
-
-      setFilteredImages(filtered);
-      setNotFilteredImages(notFiltered);
-      
-    } catch (error) {
-      console.error(error);
+        const data = await response.json();
+        setResults((prevResults) => [
+          ...prevResults,
+          'Best matching text for ' + imageFile.name + ': ' + data.best_match,
+        ]);
+      };
+      reader.readAsDataURL(imageFile);
     }
-  };
+  }
 
+  function handleFileSelect(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const files = event.dataTransfer.files;
+    updateImagePreviews(files);
+  }
+
+  function handleDragOver(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = 'copy';
+  }
+
+  function handleDragLeave(event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function updateImagePreviews(files) {
+    const fileList = Array.from(files);
+    setImages(fileList);
+  }
+  
   return (
-    <div className="App">
-      <div className="drop-area" onDrop={onImageDrop} onDragOver={onDragOver}>
-        <p>Drag & Drop Images Here</p>
-        <div className="preview">
-          {images.map((image, index) => (
-            <img key={index} src={image.src} alt={`Uploaded-${index}`} />
-          ))}
-        </div>
-      </div>
-      <div className="filter">
+  <div className="container">
+    <h1>Image Text Similarity</h1>
+    <form onSubmit={(event) => { event.preventDefault(); submitForm(); }}>
+      <div
+        id="drop-zone"
+        className="drop-zone"
+        onDrop={handleFileSelect}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+      >
+        Drop images here or click to select
         <input
-          type="text"
-          placeholder="Filter description"
-          value={inputText}
-          onChange={onInputChange}
+          type="file"
+          id="image-input"
+          accept="image/*"
+          multiple
+          style={{ display: 'none' }}
+          onChange={(e) => updateImagePreviews(e.target.files)}
         />
-        <button onClick={onFilterClick}>Filter Images</button>
       </div>
-      <div className="results">
-        <div className="filtered-images">
-          <h3>Filtered Images</h3>
-          {filteredImages.map((image, index) => (
-            <img key={index} src={image.src} alt={`Filtered-${index}`} />
-          ))}
-        </div>
-        <div className="not-filtered-images">
-          <h3>Not Filtered Images</h3>
-          {notFilteredImages.map((image, index) => (
-            <img key={index} src={image.src} alt={`NotFiltered-${index}`} />
-          ))}
-        </div>
+      <br />
+      <div id="preview-container">
+        {images.map((imageFile, index) => (
+          <img
+            key={index}
+            src={URL.createObjectURL(imageFile)}
+            alt="Selected Image Preview"
+            style={{ maxWidth: '100%', maxHeight: '300px' }}
+          />
+        ))}
       </div>
-    </div>
-  );
+      <br />
+      <label htmlFor="text-input1">Text Input 1:</label>
+      <input
+        type="text"
+        id="text-input1"
+        value={textInput1}
+        onChange={(e) => setTextInput1(e.target.value)}
+        required
+      />
+      <br />
+      <label htmlFor="text-input2">Text Input 2:</label>
+      <input
+        type="text"
+        id="text-input2"
+        value={textInput2}
+        onChange={(e) => setTextInput2(e.target.value)}
+        required
+      />
+      <br />
+      <button type="submit">Find Best Match</button>
+    </form>
+    <ul id="result">
+      {results.map((result, index) => (
+        <li key={index}>{result}</li>
+      ))}
+    </ul>
+  </div>
+);
+
 }
 
 export default App;
