@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Text Similarity</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    async function submitForm() {
+      const imageInput = document.getElementById('image-input');
+      const textInput1 = document.getElementById('text-input1');
+      const textInput2 = document.getElementById('text-input2');
+      const result = document.getElementById('result');
+
+      for (const imageFile of imageInput.files) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const imageBase64 = reader.result.split(',')[1];
+          const response = await fetch('http://localhost:5000/image_text_similarity_best_match', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              image_base64: imageBase64,
+              text_input1: textInput1.value,
+              text_input2: textInput2.value,
+            }),
+          });
+
+          const data = await response.json();
+          const listItem = document.createElement('li');
+          listItem.textContent = 'Best matching text for ' + imageFile.name + ': ' + data.best_match;
+          result.appendChild(listItem);
+        };
+        reader.readAsDataURL(imageFile);
+      }
+    }
+
+    function handleFileSelect(event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.classList.remove('dragover');
+
+      const files = event.dataTransfer.files;
+      const imageInput = document.getElementById('image-input');
+      imageInput.files = files;
+      updateImagePreviews(files);
+    }
+
+    function handleDragOver(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = 'copy';
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.classList.add('dragover');
+    }
+
+    function handleDragLeave(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dropZone = document.getElementById('drop-zone');
+      dropZone.classList.remove('dragover');
+    }
+
+    function updateImagePreviews(files) {
+      const previewContainer = document.getElementById('preview-container');
+      previewContainer.innerHTML = '';
+
+      Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const img = document.createElement('img');
+          img.src = reader.result;
+          img.alt = 'Selected Image Preview';
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '300px';
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1>Image Text Similarity</h1>
+    <form onsubmit="event.preventDefault(); submitForm();">
+		<div id="drop-zone" class="drop-zone" ondrop="handleFileSelect(event);" ondragover="handleDragOver(event);" ondragleave="handleDragLeave(event);">
+		Drop images here or click to select
+		<input type="file" id="image-input" accept="image/*" multiple style="display: none;" onchange="updateImagePreviews(this.files);">
+		</div>
+		<br>
+		<div id="preview-container"></div>
+		<br>
+		<label for="text-input1">Text Input 1:</label>
+		<input type="text" id="text-input1" required>
+		<br>
+		<label for="text-input2">Text Input 2:</label>
+		<input type="text" id="text-input2" required>
+		<br>
+		<button type="submit">Find Best Match</button>
+    </form>
+    <ul id="result"></ul>
+  </div>
+</body>
+</html>
