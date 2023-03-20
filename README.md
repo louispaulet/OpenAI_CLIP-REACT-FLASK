@@ -20,6 +20,8 @@ This folder contains the Flask backend for the application. The backend consists
 
 - `Dockerfile`: Configuration for building the backend Docker container
 - `app.py`: Main Flask application file, containing the API endpoint and the CLIP model integration
+- `test_unit.py`: Unit tests for the backend
+- `test_integration.py`: Integration tests for the backend
 
 ### `clip-filter-frontend`
 
@@ -32,6 +34,7 @@ This folder contains the React frontend for the application. The frontend provid
 ### Other Files
 
 - `docker-compose.yml`: Configuration for running the frontend and backend services using Docker Compose
+- `run_tests.sh`: Shell script to run unit and integration tests using Docker Compose
 
 ## Getting Started
 
@@ -58,6 +61,28 @@ docker-compose up --build
 ```
 
 4. Access the application in your web browser at http://localhost.
+
+### Running Unit and Integration Tests
+
+Before running the tests, make sure you have Docker and Docker Compose installed on your system. To run the unit and integration tests, follow these steps:
+
+1. Make sure the run_tests.sh script (in the project root directory) is executable. In your terminal or command prompt, run the following command:
+```bash
+chmod +x run_tests.sh
+```
+
+2. Run the tests using the script:
+```bash
+./run_tests.sh
+```
+
+
+Note: If you're on Windows, use the run_tests.bat batch file to run the tests. Simply execute the following command:
+```bash
+run_tests.bat
+```
+
+The script will start the backend and frontend services, wait for them to be up and running, execute the unit and integration tests, and then stop the backend and frontend services. The test results will be displayed in the console.
 
 ## Contributing
 

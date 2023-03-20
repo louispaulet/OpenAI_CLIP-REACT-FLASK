@@ -13,3 +13,7 @@ services:
     environment:
       - FLASK_APP=app.py
       - FLASK_RUN_HOST=0.0.0.0
+
+  backend-tests:
+    build: ./clip-filter-backend
+    command: ["sh", "-c", "python test_unit.py && python test_integration.py"]
