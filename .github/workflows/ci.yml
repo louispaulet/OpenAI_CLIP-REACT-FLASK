@@ -40,7 +40,7 @@ jobs:
         sudo chmod +x /usr/local/bin/docker-compose
 
     - name: Start services and run tests
+      working-directory: ${{ github.workspace }}
       run: |
-        cd $GITHUB_WORKSPACE
         sudo chmod +x run_tests.sh
         sudo ./run_tests.sh
