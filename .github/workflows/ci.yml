@@ -41,4 +41,6 @@ jobs:
 
     - name: Start services and run tests
       run: |
+        cd $GITHUB_WORKSPACE
+        sudo chmod +x run_tests.sh
         sudo ./run_tests.sh
