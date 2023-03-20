@@ -42,5 +42,5 @@ jobs:
     - name: Start services and run tests
       working-directory: ${{ github.workspace }}
       run: |
-        sudo chmod +x run_tests.sh
-        sudo ./run_tests.sh
+        sudo chmod +x ./clip-filter-backend/run_tests.sh
+        sudo ./clip-filter-backend/run_tests.sh
